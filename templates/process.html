@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Processing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+</head>
+<body>
+<div class="container">
+    <h1>Processing Video</h1>
+    <div  class="card">
+        <div class="card-body" >
+            <ul class="list-group" id="results" style="height: 600px;overflow: auto">
+            </ul>
+          </div>
+    </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js"></script>
+    <script>
+        const videoUrl = "{{ video_url }}";
+        const socket = io.connect('http://' + document.domain + ':' + location.port, {
+            query: 'url=' + encodeURIComponent(videoUrl)
+        });
+
+        socket.on('frame', function(message) {
+            const results = JSON.parse(message.data);
+            const resultsDiv = document.getElementById('results');
+            const newResult = document.createElement('li');
+            newResult.className = 'list-group-item';
+            const timestamp = new Date().toLocaleString();
+            newResult.innerHTML = `<div class="ms-2 me-auto">
+      <div class="fw-bold">${timestamp}</div>
+      ${JSON.stringify(results, null, 2)}
+    </div>`;
+            resultsDiv.insertBefore(newResult, resultsDiv.firstChild);
+        });
+
+        window.addEventListener('beforeunload', function() {
+            socket.close();
+        });
+    </script>
+</body>
+</html>
